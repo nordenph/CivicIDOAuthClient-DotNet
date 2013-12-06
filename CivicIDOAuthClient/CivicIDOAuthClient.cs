@@ -94,7 +94,7 @@ namespace Accela.OAuth.Client
             //Fill the Dictionary with user's data. This will be available through ExytraData Dictionary of the DotNetOpenAuth.AspNet.AuthenticationResult instance
             if (civicUser != null)
             {
-                userData.Add("id", civicUser.Email);
+                userData.Add("id", civicUser.LoginName);
                 userData.Add("civicId", civicUser.Id);
                 userData.Add("email", civicUser.Email);
                 userData.Add("login", civicUser.LoginName);
