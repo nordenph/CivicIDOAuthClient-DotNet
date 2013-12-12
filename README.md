@@ -1,4 +1,1 @@
-CivicIDOAuthClient-DotNet
-=========================
-
-OAuth 2 client library (.NET) for integrating with CivicID
+**This is a branch with screenshots for the CivicIDOAuthClient-DotNet library**
