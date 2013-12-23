@@ -21,13 +21,15 @@ namespace Accela.OAuth.Client
         public string AppId { get; protected set; }
         public string AppSecret { get; protected set; }
         public string Environment { get; protected set; }
+        public string Scope { get; protected set; }
+        public string AgencyName { get; protected set; }
         
-        public CivicIDOAuthClient(string appId, string appSecret, string environment)
-            : this("CivicIDProvider", appId, appSecret, environment)
+        public CivicIDOAuthClient(string appId, string appSecret, string environment, string agencyName, string scope)
+            : this("CivicIDProvider", appId, appSecret, environment, agencyName, scope)
         {
         }
 
-        protected CivicIDOAuthClient(string providerName, string appId, string appSecret, string environment)
+        protected CivicIDOAuthClient(string providerName, string appId, string appSecret, string environment, string agencyName, string scope)
             : base(providerName)
         {
             if (!string.IsNullOrEmpty(appId))
@@ -55,12 +57,20 @@ namespace Accela.OAuth.Client
         {
             var uriBuilder = new UriBuilder(AuthorizationEndPoint);
             var queryString = new StringBuilder();
+
+            // TODO: who knows what happens if CivicIDOAuthClient.Scope is initialized with get_user_profile
+            var scope = "get_user_profile";
+            if (!string.IsNullOrEmpty(this.Scope))
+                scope += ("," + this.Scope);
             
             queryString.Append("response_type=code");
             queryString.Append("&client_id=" + this.AppId);
             queryString.Append("&redirect_uri=" + HttpUtility.UrlEncode(returnUrl.AbsoluteUri));
             queryString.Append("&environment=" + this.Environment.ToUpper());
-            queryString.Append("&scope=get_user_profile");
+            queryString.Append("&scope=" + scope);
+
+            if (!string.IsNullOrEmpty(this.AgencyName))
+                queryString.Append("&agency_name=" + this.AgencyName);
 
             uriBuilder.Query = queryString.ToString();
             
