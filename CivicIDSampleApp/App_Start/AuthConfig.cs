@@ -24,10 +24,11 @@ namespace CivicIDSampleApp
 
             //OAuthWebSecurity.RegisterClient(
             //    new CivicIDOAuthClient(
-            //        appId: "",
-            //        appSecret: "",
-            //        environment: "TEST"),
-            //    "Civic ID", null);
+            //        appId: "your app id",
+            //        appSecret: "your app secret",
+            //        environment: "environment (e.g. TEST, PROD)",
+            //        agencyName: "agency name",
+            //        scopes: new string[] { "some scope" }), "Civic ID", null);
 
             //OAuthWebSecurity.RegisterGoogleClient();
         }

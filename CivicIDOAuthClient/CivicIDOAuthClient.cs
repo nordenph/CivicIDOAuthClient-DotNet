@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DotNetOpenAuth.AspNet.Clients;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web;
-using DotNetOpenAuth.AspNet.Clients;
-using Newtonsoft.Json;
 
 namespace Accela.OAuth.Client
 {
@@ -18,18 +19,20 @@ namespace Accela.OAuth.Client
 
         #endregion
 
+        private string _profileScope = "get_user_profile";
+
         public string AppId { get; protected set; }
         public string AppSecret { get; protected set; }
         public string Environment { get; protected set; }
-        public string Scope { get; protected set; }
+        public string[] Scopes { get; protected set; }
         public string AgencyName { get; protected set; }
         
-        public CivicIDOAuthClient(string appId, string appSecret, string environment, string agencyName, string scope)
-            : this("CivicIDProvider", appId, appSecret, environment, agencyName, scope)
+        public CivicIDOAuthClient(string appId, string appSecret, string environment, string agencyName, string[] scopes)
+            : this("CivicIDProvider", appId, appSecret, environment, agencyName, scopes)
         {
         }
 
-        protected CivicIDOAuthClient(string providerName, string appId, string appSecret, string environment, string agencyName, string scope)
+        protected CivicIDOAuthClient(string providerName, string appId, string appSecret, string environment, string agencyName, string[] scopes)
             : base(providerName)
         {
             if (!string.IsNullOrEmpty(appId))
@@ -46,6 +49,29 @@ namespace Accela.OAuth.Client
                 this.Environment = environment;
             else
                 throw new Exception("Environment is required");
+
+            if (!string.IsNullOrEmpty(agencyName))
+                this.AgencyName = agencyName;
+
+            var scopeList = new List<string>();
+
+            if (scopes != null
+                && scopes.Any())
+            {
+                // check to see if this.Scope already has get_user_profile. If not, add profile scope
+                if (!Array.Exists(scopes, delegate(string str) { return str.Equals(_profileScope, StringComparison.OrdinalIgnoreCase); }))
+                {
+                    // add profile scope
+                    scopeList.Add(_profileScope);
+                }
+
+                // copy over scopes passed in by the client
+                scopeList.AddRange(scopes);
+            }
+            else
+                scopeList.Add(_profileScope);
+
+            this.Scopes = scopeList.ToArray();
         }
         
         /// <summary>
@@ -57,17 +83,13 @@ namespace Accela.OAuth.Client
         {
             var uriBuilder = new UriBuilder(AuthorizationEndPoint);
             var queryString = new StringBuilder();
+            var scopesString = string.Join(" ", this.Scopes);
 
-            // TODO: who knows what happens if CivicIDOAuthClient.Scope is initialized with get_user_profile
-            var scope = "get_user_profile";
-            if (!string.IsNullOrEmpty(this.Scope))
-                scope += ("," + this.Scope);
-            
             queryString.Append("response_type=code");
             queryString.Append("&client_id=" + this.AppId);
             queryString.Append("&redirect_uri=" + HttpUtility.UrlEncode(returnUrl.AbsoluteUri));
             queryString.Append("&environment=" + this.Environment.ToUpper());
-            queryString.Append("&scope=" + scope);
+            queryString.Append("&scope=" + scopesString);
 
             if (!string.IsNullOrEmpty(this.AgencyName))
                 queryString.Append("&agency_name=" + this.AgencyName);
