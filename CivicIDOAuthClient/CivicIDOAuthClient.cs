@@ -26,13 +26,15 @@ namespace Accela.OAuth.Client
         public string Environment { get; protected set; }
         public string[] Scopes { get; protected set; }
         public string AgencyName { get; protected set; }
-        
+
+        // Initializes provider with the default name: CivicIDProvider
         public CivicIDOAuthClient(string appId, string appSecret, string environment, string agencyName, string[] scopes)
             : this("CivicIDProvider", appId, appSecret, environment, agencyName, scopes)
         {
         }
 
-        protected CivicIDOAuthClient(string providerName, string appId, string appSecret, string environment, string agencyName, string[] scopes)
+        // Initializes provider with custom name
+        public CivicIDOAuthClient(string providerName, string appId, string appSecret, string environment, string agencyName, string[] scopes)
             : base(providerName)
         {
             if (!string.IsNullOrEmpty(appId))
