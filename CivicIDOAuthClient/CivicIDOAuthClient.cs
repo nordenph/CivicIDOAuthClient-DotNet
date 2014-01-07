@@ -135,6 +135,8 @@ namespace Accela.OAuth.Client
                 userData.Add("firstName", civicUser.FirstName);
                 userData.Add("lastName", civicUser.LastName);
 
+                userData.Add("agencyName", this.AgencyName.ToLower());
+
                 userData.Add("countryCode", civicUser.CountryCode);
                 userData.Add("city", civicUser.City);
                 userData.Add("streetAddress", civicUser.StreetAddress);
