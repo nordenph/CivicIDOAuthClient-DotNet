@@ -52,6 +52,8 @@ namespace Accela.OAuth.Client
             else
                 throw new Exception("Environment is required");
 
+            this.AgencyName = string.Empty;
+
             if (!string.IsNullOrEmpty(agencyName))
                 this.AgencyName = agencyName;
 
