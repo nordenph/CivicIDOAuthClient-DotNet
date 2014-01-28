@@ -22,13 +22,24 @@ namespace CivicIDSampleApp
             //    appId: "",
             //    appSecret: "");
 
+            //var appInfo = new AppInfo
+            //{
+            //    AgencyName = "agency name (for Agency app) or empty string for citizen app",
+            //    ApplicationId = "your app id (Citizen or Agency app)",
+            //    ApplicationSecret = "your app secret (Citizen or Agency app)",
+            //    Environment = "your environment", //e.g. TEST, PROD
+            //    Scopes = null
+            //};
+
+            //var endPoints = new EndPointsConfig
+            //{
+            //    AuthorizationEndPoint = "auth end-point", //e.g. "https://auth.accela.com/oauth2/authorize"
+            //    TokenEndPoint = "exchange token end-point", //e.g. "https://apis.accela.com/oauth2/token"
+            //    UserProfileEndPoint = "user profile end-point", //e.g. "https://apis.accela.com/v3/users/me"
+            //};
+
             //OAuthWebSecurity.RegisterClient(
-            //    new CivicIDOAuthClient(
-            //        appId: "your app id",
-            //        appSecret: "your app secret",
-            //        environment: "environment (e.g. TEST, PROD)",
-            //        agencyName: "agency name",
-            //        scopes: new string[] { "some scope" }), "Civic ID", null);
+            //    new CivicIDOAuthClient(appInfo, endPoints), "Civic ID", null);
 
             //OAuthWebSecurity.RegisterGoogleClient();
         }

@@ -11,71 +11,58 @@ namespace Accela.OAuth.Client
 {
     public class CivicIDOAuthClient : OAuth2Client
     {
-        #region End Points
-
-        private const string AuthorizationEndPoint = "https://auth.accela.com/oauth2/authorize";
-        private const string TokenEndPoint = "https://apis.accela.com/oauth2/token";
-        private const string UserProfileEndPoint = "https://apis.accela.com/v3/users/me";
-
-        #endregion
-
         private string _profileScope = "get_user_profile";
 
-        public string AppId { get; protected set; }
-        public string AppSecret { get; protected set; }
-        public string Environment { get; protected set; }
-        public string[] Scopes { get; protected set; }
-        public string AgencyName { get; protected set; }
+        public AppInfo AppInfo { get; protected set; }
+        public EndPointsConfig EndPoints { get; protected set; }
 
         // Initializes provider with the default name: CivicIDProvider
-        public CivicIDOAuthClient(string appId, string appSecret, string environment, string agencyName, string[] scopes)
-            : this("CivicIDProvider", appId, appSecret, environment, agencyName, scopes)
-        {
+        public CivicIDOAuthClient(AppInfo appInfo, EndPointsConfig endPoints)
+            : this("CivicIDProvider", appInfo, endPoints)
+        {   
         }
 
         // Initializes provider with custom name
-        public CivicIDOAuthClient(string providerName, string appId, string appSecret, string environment, string agencyName, string[] scopes)
+        public CivicIDOAuthClient(string providerName, AppInfo appInfo, EndPointsConfig endPoints)
             : base(providerName)
         {
-            if (!string.IsNullOrEmpty(appId))
-                this.AppId = appId;
-            else
-                throw new Exception("AppId is required");
+            if (appInfo == null)
+                throw new Exception("Application Info is required");
+
+            if (endPoints == null)
+                throw new Exception("End-points are required");
+
+            this.EndPoints = endPoints;
+            this.AppInfo = appInfo;
             
-            if (!string.IsNullOrEmpty(appSecret))
-                this.AppSecret = appSecret;
-            else
-                throw new Exception("AppSecret is required");
+            if (string.IsNullOrEmpty(appInfo.ApplicationId))
+                throw new Exception("Application Id is required");
+            
+            if (string.IsNullOrEmpty(appInfo.ApplicationSecret))
+                throw new Exception("Application Secret is required");
 
-            if (!string.IsNullOrEmpty(environment))
-                this.Environment = environment;
-            else
+            if (string.IsNullOrEmpty(appInfo.Environment))
                 throw new Exception("Environment is required");
-
-            this.AgencyName = string.Empty;
-
-            if (!string.IsNullOrEmpty(agencyName))
-                this.AgencyName = agencyName;
 
             var scopeList = new List<string>();
 
-            if (scopes != null
-                && scopes.Any())
+            if (this.AppInfo.Scopes != null
+                && this.AppInfo.Scopes.Any())
             {
                 // check to see if this.Scope already has get_user_profile. If not, add profile scope
-                if (!Array.Exists(scopes, delegate(string str) { return str.Equals(_profileScope, StringComparison.OrdinalIgnoreCase); }))
+                if (!Array.Exists(this.AppInfo.Scopes, delegate(string str) { return str.Equals(_profileScope, StringComparison.OrdinalIgnoreCase); }))
                 {
                     // add profile scope
                     scopeList.Add(_profileScope);
                 }
 
                 // copy over scopes passed in by the client
-                scopeList.AddRange(scopes);
+                scopeList.AddRange(this.AppInfo.Scopes);
             }
             else
                 scopeList.Add(_profileScope);
 
-            this.Scopes = scopeList.ToArray();
+            this.AppInfo.Scopes = scopeList.ToArray();
         }
         
         /// <summary>
@@ -85,18 +72,18 @@ namespace Accela.OAuth.Client
         /// <returns></returns>
         protected override Uri GetServiceLoginUrl(Uri returnUrl)
         {
-            var uriBuilder = new UriBuilder(AuthorizationEndPoint);
+            var uriBuilder = new UriBuilder(this.EndPoints.AuthorizationEndPoint);
             var queryString = new StringBuilder();
-            var scopesString = string.Join(" ", this.Scopes);
+            var scopesString = string.Join(" ", this.AppInfo.Scopes);
 
             queryString.Append("response_type=code");
-            queryString.Append("&client_id=" + this.AppId);
+            queryString.Append("&client_id=" + this.AppInfo.ApplicationId);
             queryString.Append("&redirect_uri=" + HttpUtility.UrlEncode(returnUrl.AbsoluteUri));
-            queryString.Append("&environment=" + this.Environment.ToUpper());
+            queryString.Append("&environment=" + this.AppInfo.Environment.ToUpper());
             queryString.Append("&scope=" + scopesString);
 
-            if (!string.IsNullOrEmpty(this.AgencyName))
-                queryString.Append("&agency_name=" + this.AgencyName);
+            if (!string.IsNullOrEmpty(this.AppInfo.AgencyName))
+                queryString.Append("&agency_name=" + this.AppInfo.AgencyName);
 
             uriBuilder.Query = queryString.ToString();
             
@@ -118,9 +105,9 @@ namespace Accela.OAuth.Client
                 client.Headers[HttpRequestHeader.ContentType] = "application/json; charset=utf-8;";
                 client.Headers[HttpRequestHeader.Accept] = "application/json";
                 client.Headers[HttpRequestHeader.Authorization] = accessToken;
-                client.Headers.Add("x-accela-appid", this.AppId);
+                client.Headers.Add("x-accela-appid", this.AppInfo.ApplicationId);
 
-                var responseBody = client.DownloadString(UserProfileEndPoint);
+                var responseBody = client.DownloadString(this.EndPoints.UserProfileEndPoint);
 
                 civicUser = JsonConvert.DeserializeObject<User>(responseBody);
             }
@@ -137,7 +124,7 @@ namespace Accela.OAuth.Client
                 userData.Add("firstName", civicUser.FirstName);
                 userData.Add("lastName", civicUser.LastName);
 
-                userData.Add("agencyName", this.AgencyName.ToLower());
+                userData.Add("agencyName", this.AppInfo.AgencyName.ToLower());
 
                 userData.Add("countryCode", civicUser.CountryCode);
                 userData.Add("city", civicUser.City);
@@ -165,20 +152,20 @@ namespace Accela.OAuth.Client
         {
             var queryString = new StringBuilder();
 
-            queryString.Append("client_id=" + this.AppId);
-            queryString.Append("&client_secret=" + this.AppSecret);
+            queryString.Append("client_id=" + this.AppInfo.ApplicationId);
+            queryString.Append("&client_secret=" + this.AppInfo.ApplicationSecret);
             queryString.Append("&grant_type=authorization_code");
             queryString.Append("&code=" + authorizationCode);
             queryString.Append("&redirect_uri=" + HttpUtility.UrlEncode(returnUrl.AbsoluteUri));
 
             var query = queryString.ToString();
 
-            var tokenRequest = WebRequest.Create(TokenEndPoint);
+            var tokenRequest = WebRequest.Create(this.EndPoints.TokenEndPoint);
             tokenRequest.ContentType = "application/x-www-form-urlencoded";
             tokenRequest.ContentLength = query.Length;
             tokenRequest.Method = "POST";
             //set headers
-            tokenRequest.Headers.Add("x-accela-appid", this.AppId);
+            tokenRequest.Headers.Add("x-accela-appid", this.AppInfo.ApplicationId);
 
             var response = RequestHelper.SendPOSTRequest<AccessToken>(tokenRequest, query);
 
