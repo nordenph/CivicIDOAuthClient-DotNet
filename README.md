@@ -17,7 +17,7 @@ __Step 1.__ Register your app
 
 Register your application on the Accela Developer portal (https://developer.accela.com/)
 
-__Step 2.__ Download the soltuion from GitHub
+__Step 2.__ Download the solution from GitHub
 
 __Step 3.__ Make changes to the configuration
 
