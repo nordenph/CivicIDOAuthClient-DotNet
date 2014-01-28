@@ -25,14 +25,7 @@ Make following changes to the AuthConfig.cs file:
 
 ![AuthConfig.cs](https://github.com/Accela-Inc/CivicIDOAuthClient-DotNet/blob/screenshots/screenshots/authconfig.png?raw=true 'AuthConfig.cs')
 
-
-For the Citizen App:
-
-![Citizen App](https://github.com/Accela-Inc/CivicIDOAuthClient-DotNet/blob/screenshots/screenshots/citizen_app_config.png?raw=true 'citizen app')
-
-For the Agency App:
-
-![Agency App](https://github.com/Accela-Inc/CivicIDOAuthClient-DotNet/blob/screenshots/screenshots/agency_app_config.png?raw=true 'agency app')
+![Agency App](https://github.com/Accela-Inc/CivicIDOAuthClient-DotNet/blob/screenshots/screenshots/app_config.png?raw=true 'app config')
 
 __Step 4.__ Run the solution (F5)
 
