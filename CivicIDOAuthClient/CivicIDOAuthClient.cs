@@ -11,7 +11,7 @@ namespace Accela.OAuth.Client
 {
     public class CivicIDOAuthClient : OAuth2Client
     {
-        private string _profileScope = "get_user_profile";
+        private string _profileScope = "get_user_profile get_my_profile";
 
         public AppInfo AppInfo { get; protected set; }
         public EndPointsConfig EndPoints { get; protected set; }
