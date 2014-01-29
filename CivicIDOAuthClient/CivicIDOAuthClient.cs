@@ -11,7 +11,7 @@ namespace Accela.OAuth.Client
 {
     public class CivicIDOAuthClient : OAuth2Client
     {
-        private string _profileScope = "get_user_profile get_my_profile";
+        private string _profileScope = "";
 
         public AppInfo AppInfo { get; protected set; }
         public EndPointsConfig EndPoints { get; protected set; }
@@ -45,6 +45,11 @@ namespace Accela.OAuth.Client
                 throw new Exception("Environment is required");
 
             var scopeList = new List<string>();
+
+            if (endPoints.UserProfileEndPoint.Contains("v3"))
+                _profileScope = "get_user_profile";
+            else if (endPoints.UserProfileEndPoint.Contains("v4"))
+                _profileScope = "get_my_profile";
 
             if (this.AppInfo.Scopes != null
                 && this.AppInfo.Scopes.Any())
