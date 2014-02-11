@@ -1,5 +1,6 @@
 ﻿using DotNetOpenAuth.AspNet.Clients;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -113,8 +114,12 @@ namespace Accela.OAuth.Client
                 client.Headers.Add("x-accela-appid", this.AppInfo.ApplicationId);
 
                 var responseBody = client.DownloadString(this.EndPoints.UserProfileEndPoint);
+                var json = JObject.Parse(responseBody);
 
-                civicUser = JsonConvert.DeserializeObject<User>(responseBody);
+                if (json["result"] != null) // v4
+                    civicUser = json["result"].ToObject<User>();
+                else // v3
+                    civicUser = JsonConvert.DeserializeObject<User>(responseBody);
             }
 
             var userData = new Dictionary<string, string>();
@@ -122,10 +127,12 @@ namespace Accela.OAuth.Client
             //Fill the Dictionary with user's data. This will be available through ExytraData Dictionary of the DotNetOpenAuth.AspNet.AuthenticationResult instance
             if (civicUser != null)
             {
-                userData.Add("id", civicUser.LoginName);
+                var login = !string.IsNullOrWhiteSpace(civicUser.LoginName) ? civicUser.LoginName : civicUser.Id.ToLower();
+
+                userData.Add("id", login);
                 userData.Add("civicId", civicUser.Id);
                 userData.Add("email", civicUser.Email);
-                userData.Add("login", civicUser.LoginName);
+                userData.Add("login", login);
                 userData.Add("firstName", civicUser.FirstName);
                 userData.Add("lastName", civicUser.LastName);
 
