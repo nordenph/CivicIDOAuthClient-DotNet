@@ -29,7 +29,7 @@ namespace APIExplorer
                 ApplicationId = ConfigurationManager.AppSettings["appId"],
                 ApplicationSecret = ConfigurationManager.AppSettings["appSecret"],
                 Environment = "TEST", //e.g. TEST, PROD
-                Scopes = new string[] { "create_record", "get_records", "get_record" }
+                Scopes = new string[] { "records", "get_record_contacts" }
             };
 
             var endPoints = new EndPointsConfig

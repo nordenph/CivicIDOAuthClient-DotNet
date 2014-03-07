@@ -6,7 +6,32 @@
 
     if (string.IsNullOrWhiteSpace(result))
     {
-        result = "{\n\t\"createRecord\":\n\t{\n\t\t\"type\":\n\t\t{\n\t\t\t\"id\": \"Building-Electrical-Residential-NA\"\n\t\t}\n\t}\n}";
+        result = "{\n" +
+            "\t\"createRecord\":\n" +
+            "\t{\n" +
+            "\t\t\"type\":\n" +
+            "\t\t{\n" +
+            "\t\t\t\"id\": \"Building-Electrical-Residential-NA\"\n" +
+            "\t\t},\n" +
+            "\t\t\"contacts\":\n" +
+            "\t\t[{\n" +
+            "\t\t\t\"familyName\": \"Turman\",\n" +
+            "\t\t\t\"givenName\": \"Igor\",\n" +
+            "\t\t\t\"tels\": [\n" +
+            "\t\t\t\t\"(415) 111-2233\"\n" +
+            "\t\t\t],\n" +
+            "\t\t\t\"emails\": [\n" +
+            "\t\t\t\t\"igor@email.com\"\n" +
+            "\t\t\t],\n" +
+            "\t\t\t\"contactRole\":\n" +
+            "\t\t\t{\n" +
+            "\t\t\t\t\"id\": \"Building.cOwner\"\n" +
+            "\t\t\t},\n" +
+            "\t\t\t\"isPrimary\": \"true\",\n" +
+            "\t\t\t\"entityState\": \"Added\"\n" +
+            "\t\t}]\n" +
+            "\t}\n" +
+            "}";
     }
 }
 
@@ -14,12 +39,18 @@
 
 @if (!string.IsNullOrWhiteSpace(recordId))
 {
-    <a href="/home/all?id=@recordId">View created record: (@recordId)</a>
+    <p>View created record (@recordId):</p>
+    <p>
+        <a href="/home/getdata?type=record&id=@recordId">Record summary</a>
+    </p>
+    <p>
+        <a href="/home/getdata?type=contacts&id=@recordId">Record contacts</a>
+    </p>
 }
 
 @using(Html.BeginForm("create", "home"))
 {
-    <textarea name="json" style="width:100%; height:250px">@result</textarea>
+    <textarea name="json" style="width:100%; height:500px">@result</textarea>
     
     <button type="submit">Submit</button>
 }

@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace APIExplorer.Controllers
 {
     public class HomeController : Controller
     {
-        string _recordUrl = "/v3/records";
+        string _createRecordUrl = "/v3/records";
+        string _getAllRecordsUrl = "/v3/records";
         string _getRecordUrl = "/v3p/records";
+        string _recordContactsUrl = "/v3/records/{id}/contacts";
 
         public ActionResult Index()
         {
@@ -24,7 +23,7 @@ namespace APIExplorer.Controllers
         }
 
         [Authorize]
-        public ActionResult All()
+        public ActionResult GetData(string type, string id)
         {
             if ((string)Session["token"] == null)
             {
@@ -33,32 +32,31 @@ namespace APIExplorer.Controllers
                 return View();
             }
 
-            try
+            var url = _getAllRecordsUrl;
+
+            switch (type)
             {
-                HttpWebRequest request;
+                case "record":
+                    {
+                        if (id != null)
+                            url = _getRecordUrl + "/" + id;
 
-                if (Request.Params["id"] != null)
-                    request = CreateRequest("get", _getRecordUrl + "/" + Request.Params["id"]);
-                else
-                    request = CreateRequest("get", _recordUrl);
+                        break;
+                    }
+                case "contacts":
+                    {
+                        if (id != null)
+                            url = _recordContactsUrl.Replace("{id}", id);
 
-                var httpResponse = (HttpWebResponse)request.GetResponse();
-                var result = "";
-
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    result = streamReader.ReadToEnd();
-
-                    var jt = JToken.Parse(result);
-                    string formattedResult = jt.ToString(Formatting.Indented);
-
-                    ViewBag.result = formattedResult;
-                }
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
             }
-            catch(Exception ex)
-            {
-                ViewBag.error = ex.Message;
-            }
+
+            ViewBag.result = GetResponse("get", url);
 
             return View();
         }
@@ -74,7 +72,7 @@ namespace APIExplorer.Controllers
         [Authorize]
         public ActionResult Create(string json)
         {
-            var request = CreateRequest("post", _recordUrl);
+            var request = CreateRequest("post", _createRecordUrl);
 
             using (StreamWriter s = new StreamWriter(request.GetRequestStream()))
             {
@@ -125,6 +123,33 @@ namespace APIExplorer.Controllers
             request.Headers.Add("Authorization", (string)Session["token"]);
 
             return request;
+        }
+
+        private string GetResponse(string method, string url)
+        {
+            try
+            {
+                HttpWebRequest request;
+
+                request = CreateRequest(method, url);
+
+                var httpResponse = (HttpWebResponse)request.GetResponse();
+                var result = "";
+
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    result = streamReader.ReadToEnd();
+
+                    var jt = JToken.Parse(result);
+                    string formattedResult = jt.ToString(Formatting.Indented);
+
+                    return formattedResult;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
     }
 }

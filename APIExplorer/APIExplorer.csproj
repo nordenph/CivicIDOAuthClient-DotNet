@@ -293,7 +293,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\All.cshtml" />
+    <Content Include="Views\Home\GetData.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\Create.cshtml" />
