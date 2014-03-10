@@ -14,6 +14,7 @@ namespace APIExplorer.Controllers
         string _getAllRecordsUrl = "/v3/records";
         string _getRecordUrl = "/v3p/records";
         string _recordContactsUrl = "/v3/records/{id}/contacts";
+        string _recordAsisUrl = "/v3/records/{id}/asis";
 
         public ActionResult Index()
         {
@@ -50,6 +51,13 @@ namespace APIExplorer.Controllers
 
                         break;
                     }
+                case "asis":
+                    {
+                        if (id != null)
+                            url = _recordAsisUrl.Replace("{id}", id);
+
+                        break;
+                    }
                 default:
                     {
                         break;
@@ -72,6 +80,13 @@ namespace APIExplorer.Controllers
         [Authorize]
         public ActionResult Create(string json)
         {
+            if ((string)Session["token"] == null)
+            {
+                ViewBag.error = "Token is missing. Please [re]login again";
+
+                return View();
+            }
+
             var request = CreateRequest("post", _createRecordUrl);
 
             using (StreamWriter s = new StreamWriter(request.GetRequestStream()))
@@ -80,19 +95,26 @@ namespace APIExplorer.Controllers
                 s.Flush();
             }
 
-            var httpResponse = (HttpWebResponse)request.GetResponse();
-            
-            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            try
             {
-                var result = streamReader.ReadToEnd();
+                var httpResponse = (HttpWebResponse)request.GetResponse();
 
-                var jt = JToken.Parse(result);
-                string formattedResult = jt.ToString(Formatting.Indented);
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
 
-                var id = jt["recordId"]["id"];
+                    var jt = JToken.Parse(result);
+                    string formattedResult = jt.ToString(Formatting.Indented);
 
-                ViewBag.recordId = id != null ? id.ToString() : string.Empty;
-                ViewBag.result = formattedResult;
+                    var id = jt["recordId"]["id"];
+
+                    ViewBag.recordId = id != null ? id.ToString() : string.Empty;
+                    ViewBag.result = formattedResult;
+                }
+            }
+            catch(WebException ex)
+            {
+                return new ContentResult { Content = ex.Message };
             }
 
             return View();

@@ -1,56 +1,42 @@
 ﻿@{
     ViewBag.Title = "Create";
     var result = ViewBag.result;
+    var error = (string)ViewBag.error;
 
     var recordId = (string)ViewBag.recordId;
 
     if (string.IsNullOrWhiteSpace(result))
     {
-        result = "{\n" +
-            "\t\"createRecord\":\n" +
-            "\t{\n" +
-            "\t\t\"type\":\n" +
-            "\t\t{\n" +
-            "\t\t\t\"id\": \"Building-Electrical-Residential-NA\"\n" +
-            "\t\t},\n" +
-            "\t\t\"contacts\":\n" +
-            "\t\t[{\n" +
-            "\t\t\t\"familyName\": \"Turman\",\n" +
-            "\t\t\t\"givenName\": \"Igor\",\n" +
-            "\t\t\t\"tels\": [\n" +
-            "\t\t\t\t\"(415) 111-2233\"\n" +
-            "\t\t\t],\n" +
-            "\t\t\t\"emails\": [\n" +
-            "\t\t\t\t\"igor@email.com\"\n" +
-            "\t\t\t],\n" +
-            "\t\t\t\"contactRole\":\n" +
-            "\t\t\t{\n" +
-            "\t\t\t\t\"id\": \"Building.cOwner\"\n" +
-            "\t\t\t},\n" +
-            "\t\t\t\"isPrimary\": \"true\",\n" +
-            "\t\t\t\"entityState\": \"Added\"\n" +
-            "\t\t}]\n" +
-            "\t}\n" +
-            "}";
+        result = HttpContext.GetGlobalResourceObject("Templates", "recordWithAsis").ToString();
     }
 }
 
 <h2>Create</h2>
 
-@if (!string.IsNullOrWhiteSpace(recordId))
+@if (!string.IsNullOrWhiteSpace(error))
 {
-    <p>View created record (@recordId):</p>
-    <p>
-        <a href="/home/getdata?type=record&id=@recordId">Record summary</a>
-    </p>
-    <p>
-        <a href="/home/getdata?type=contacts&id=@recordId">Record contacts</a>
-    </p>
+    <span class="error">@error</span>
 }
-
-@using(Html.BeginForm("create", "home"))
+else
 {
-    <textarea name="json" style="width:100%; height:500px">@result</textarea>
+    if (!string.IsNullOrWhiteSpace(recordId))
+    {
+        <p>View created record (@recordId):</p>
+        <p>
+            <a href="/home/getdata?type=record&id=@recordId">Record summary</a>
+        </p>
+        <p>
+            <a href="/home/getdata?type=contacts&id=@recordId">Record contacts</a>
+        </p>
+        <p>
+            <a href="/home/getdata?type=asis&id=@recordId">Record ASIs</a>
+        </p>
+    }
+
+    using(Html.BeginForm("create", "home"))
+    {
+        <textarea name="json" style="width:100%; height:500px">@result</textarea>
     
-    <button type="submit">Submit</button>
+        <button type="submit">Submit</button>
+    }
 }
